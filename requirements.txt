@@ -1,0 +1,37 @@
+# Core dependencies
+torch>=1.9.0
+torchvision>=0.10.0
+numpy>=1.19.0
+opencv-python>=4.5.0
+
+# Detectron2
+detectron2>=0.6
+
+# Data processing and augmentation
+albumentations>=1.0.0
+opencv-python-headless>=4.5.0
+pillow>=8.0.0
+scikit-image>=0.19.0
+
+# Machine learning and evaluation
+scikit-learn>=0.24.0
+pandas>=1.1.0
+scipy>=1.5.0
+
+# Visualization
+matplotlib>=3.3.0
+seaborn>=0.11.0
+
+# Configuration management
+pyyaml>=5.3.0
+
+# Utilities
+tqdm>=4.50.0
+
+# Jupyter support (for notebook development)
+jupyter>=1.0.0
+ipywidgets>=7.6.0
+ipykernel>=6.0.0
+
+# Testing and debugging
+pytest>=6.0.0
