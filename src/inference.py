@@ -82,7 +82,6 @@ class SemanticSegmentationPredictor:
         # Prepare input
         height, width = image.shape[:2]
         aug_input = T.AugInput(image)
-        transforms = self.cfg.INPUT.TRANSFORMS.NAMES
         aug_input.apply_augmentations(
             [T.ResizeShortestEdge(
                 [self.cfg.INPUT.MIN_SIZE_TEST],
