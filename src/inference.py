@@ -10,7 +10,7 @@ from pathlib import Path
 from typing import Optional, Union, List, Tuple
 import logging
 
-from detectron2.config import get_cfg
+from detectron2.config import get_cfg, CfgNode
 from detectron2.modeling import build_model
 from detectron2.checkpoint import DetectionCheckpointer
 from detectron2.data import transforms as T
@@ -27,7 +27,7 @@ class SemanticSegmentationPredictor:
 
     def __init__(
         self,
-        cfg_or_model_path: Union[str, object],
+        cfg_or_model_path: Union[str, CfgNode],
         model_weights: Optional[str] = None,
         confidence_threshold: float = 0.5,
         device: str = "cuda",
@@ -86,6 +86,7 @@ class SemanticSegmentationPredictor:
             [T.ResizeShortestEdge(
                 [self.cfg.INPUT.MIN_SIZE_TEST],
                 self.cfg.INPUT.MAX_SIZE_TEST,
+                sample_style="choice",
             )]
         )
         image_tensor = torch.as_tensor(
