@@ -130,6 +130,11 @@ class SemanticSegmentationPredictor:
         else:
             raise ValueError(f"Unknown output format: {outputs.keys()}")
 
+        # Resize prediction back to original image size if needed
+        if sem_seg.shape[:2] != (height, width):
+            sem_seg = cv2.resize(sem_seg, (width, height), interpolation=cv2.INTER_NEAREST)
+            metadata["sem_seg"] = sem_seg
+
         return sem_seg, metadata
 
     def predict_batch(
@@ -211,14 +216,16 @@ def create_submission_csv(
     predictions: dict,
     output_path: str = "submission.csv",
     class_mapping: Optional[dict] = None,
+    num_classes: int = 13,
 ):
     """
-    Create submission CSV from predictions.
+    Create submission CSV from predictions with per-class RLE encoding.
 
     Args:
         predictions: Dictionary mapping image names to predicted masks.
         output_path: Path to save submission CSV.
         class_mapping: Optional mapping of class indices to class names.
+        num_classes: Total number of classes (including background, default=13 for 0-12).
     """
     import csv
 
@@ -227,9 +234,17 @@ def create_submission_csv(
         writer.writerow(["ImageId", "EncodedPixels"])
 
         for image_id, mask in predictions.items():
-            # RLE encode the mask
-            encoded = rle_encode(mask)
-            writer.writerow([image_id, encoded])
+            # For each class (excluding background class 0), create binary mask and encode
+            for class_id in range(1, num_classes):  # Start from 1 to skip background
+                # Create binary mask for this class
+                binary_mask = (mask == class_id).astype(np.uint8)
+
+                # RLE encode the binary mask
+                encoded = rle_encode(binary_mask)
+
+                # Add row with format: testImageID_classID, RLE
+                row_id = f"{image_id}_{class_id}"
+                writer.writerow([row_id, encoded])
 
     logger.info(f"Submission CSV saved to {output_path}")
 
