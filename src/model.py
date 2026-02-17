@@ -26,9 +26,16 @@ class Detectron2Config:
         learning_rate: float = 0.02,
         max_iter: int = 10000,
         checkpoint_period: int = 500,
+        ims_per_batch: int = 4,
+        lr_steps: tuple = (5000, 8000),
+        freeze_at: int = 0,
+        input_min_size_train: tuple = (512,),
+        input_max_size_train: int = 512,
+        input_min_size_test: int = 512,
+        input_max_size_test: int = 512,
     ):
         """
-        Initialize Detectron2 config.
+        Initialize Detectron2 config with comprehensive training parameters.
 
         Args:
             model_name: Name of the model from Model Zoo.
@@ -38,6 +45,13 @@ class Detectron2Config:
             learning_rate: Initial learning rate.
             max_iter: Maximum training iterations.
             checkpoint_period: Save checkpoint every N iterations.
+            ims_per_batch: Images per batch (overrides 2*num_gpus default).
+            lr_steps: LR scheduler milestones (tuple of iteration counts).
+            freeze_at: Backbone freeze level (0-5, higher=more frozen).
+            input_min_size_train: Min image size during training.
+            input_max_size_train: Max image size during training.
+            input_min_size_test: Min image size during testing.
+            input_max_size_test: Max image size during testing.
         """
         self.cfg = get_cfg()
 
@@ -49,15 +63,22 @@ class Detectron2Config:
         # Dataset config
         self.cfg.MODEL.ROI_HEADS.NUM_CLASSES = num_classes
 
-        # Training config
-        self.cfg.SOLVER.IMS_PER_BATCH = 2 * num_gpus
+        # Solver parameters (training hyperparameters)
+        self.cfg.SOLVER.IMS_PER_BATCH = ims_per_batch
         self.cfg.SOLVER.BASE_LR = learning_rate
         self.cfg.SOLVER.MAX_ITER = max_iter
-        self.cfg.SOLVER.STEPS = (max_iter // 2, max_iter * 3 // 4)
+        self.cfg.SOLVER.STEPS = lr_steps
         self.cfg.SOLVER.CHECKPOINT_PERIOD = checkpoint_period
 
-        # RPN config
-        self.cfg.MODEL.RPN.BATCH_SIZE_PER_IMAGE = batch_size_per_image
+        # Model parameters
+        self.cfg.MODEL.BACKBONE.FREEZE_AT = freeze_at
+        self.cfg.MODEL.ROI_HEADS.BATCH_SIZE_PER_IMAGE = batch_size_per_image
+
+        # Input parameters (image preprocessing)
+        self.cfg.INPUT.MIN_SIZE_TRAIN = input_min_size_train
+        self.cfg.INPUT.MAX_SIZE_TRAIN = input_max_size_train
+        self.cfg.INPUT.MIN_SIZE_TEST = input_min_size_test
+        self.cfg.INPUT.MAX_SIZE_TEST = input_max_size_test
 
         # Other configs
         self.cfg.DATALOADER.NUM_WORKERS = 4
